@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Collision Simulation</title>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="stylesheet" href="src/styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="heading-top">
+      <h3>PH 102 SPRING SEMESTER, IIT GANDHINAGAR</h3>
+      <h4>COLLISION SIMULATION</h4>
+    </div>
+    <div class="form-fill">
+      <div class="form-group">
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label> Left Ball Mass (in Kg) </label>
+            <input
+              name="ball1_mass"
+              id="ball1_mass"
+              type="text"
+              class="form-control"
+              placeholder="Mass (in Kg)"
+              pattern="[0-9]{10}"
+              required
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label> Right Ball Mass (in Kg) </label>
+            <input
+              name="ball2_mass"
+              id="ball2_mass"
+              type="text"
+              class="form-control"
+              placeholder="Mass (in Kg)"
+              pattern="[0-9]{10}"
+              required
+            />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label> Left Ball initial Velocity (in m/s) </label>
+            <input
+              name="ball1_velocity"
+              id="ball1_velocity"
+              type="text"
+              class="form-control"
+              placeholder="Velocity (in m/s)"
+              pattern="[0-9]{10}"
+              required
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label> Right Ball Initial Velocity (in m/s) </label>
+            <input
+              name="ball2_velocity"
+              id="ball2_velocity"
+              type="text"
+              class="form-control"
+              placeholder="Velocity (in m/s)"
+              pattern="[0-9]{10}"
+              required
+            />
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="form-group">
+            <label> Coefficient of Restitution (e) between two balls</label>
+            <input
+              name="restitution"
+              id="restitution"
+              type="text"
+              class="form-control"
+              placeholder="e (dimensionless) (0 <= e <= 1)"
+              pattern="[0-9]{10}"
+              required
+            />
+          </div>
+        </div>
+        <div class="text-center">
+          <button
+            type="button"
+            class="btn btn-outline-dark next-btn"
+            onclick="simulate()"
+          >
+            Start Simulation
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-dark next-btn"
+            data-toggle="modal"
+            data-target=".assumptions"
+          >
+            See Assumptions
+          </button>
+
+          <div
+            class="modal fade bd-example-modal-lg assumptions"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="myLargeModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLongTitle">
+                    Assumptions
+                  </h5>
+                  <button
+                    type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-sm-12">
+                      1. The friction, air drag and other external forces are
+                      negligible. <br />
+                      2. The collision is along the line of impact (i.e. It is
+                      not oblique). <br />
+                      3. The radius of both balls is equal and constant. <br />
+                      4. The motion of both the balls is in a straight line.
+                      <br />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <canvas id="canvas" width="1500" height="480"></canvas>
+    <div id="snackbar_"></div>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+      integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+      integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script text="text/javascript">
+      var ball1_mass;
+      var ball2_mass;
+      var ball1_velocity;
+      var ball2_velocity;
+      var res;
+      var collide = false;
+      var v1;
+      var v2;
+
+      function simulate() {
+        ball1_mass = $("#ball1_mass").val();
+        ball2_mass = $("#ball2_mass").val();
+        ball1_velocity = $("#ball1_velocity").val();
+        ball2_velocity = $("#ball2_velocity").val();
+        res = $("#restitution").val();
+
+        if (
+          ball1_mass === null ||
+          ball2_mass === null ||
+          ball1_velocity === null ||
+          ball2_velocity === null ||
+          res === null
+        ) {
+          error_show("Please fill all the fields!");
+        } else if (
+          ball1_mass.trim() === "" ||
+          ball2_mass.trim() === "" ||
+          ball1_velocity.trim() === "" ||
+          ball2_velocity.trim() === "" ||
+          res.trim() === ""
+        ) {
+          error_show("Please fill all the fields!");
+        } else if (
+          isNaN(ball1_mass) ||
+          isNaN(ball2_mass) ||
+          isNaN(ball1_velocity) ||
+          isNaN(ball2_velocity) ||
+          isNaN(res)
+        ) {
+          error_show("Please enter a float value!");
+        } else {
+          ball1_mass = Math.abs(parseFloat(ball1_mass));
+          ball2_mass = Math.abs(parseFloat(ball2_mass));
+          ball1_velocity = Math.abs(parseFloat(ball1_velocity));
+          ball2_velocity = Math.abs(parseFloat(ball2_velocity));
+
+          res = Math.abs(parseFloat(res));
+          var k1 = res * Math.abs(ball1_velocity + ball2_velocity);
+          var k2 = ball1_mass * ball1_velocity - ball2_mass * ball2_velocity;
+          v1 = (k2 - ball2_mass * k1) / (ball1_mass + ball2_mass);
+          v2 = v1 + k1;
+
+          $("#ball1_mass").val("");
+          $("#ball2_mass").val("");
+          $("#ball1_velocity").val("");
+          $("#ball2_velocity").val("");
+          $("#restitution").val("");
+
+          start();
+        }
+      }
+
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+
+      var ball1 = {
+        x: 60,
+        y: 30,
+        radius: 30,
+        color: "blue",
+        xuSpeed: ball1_velocity,
+        yuSpeed: 0,
+        xvSpeed: v1
+      };
+      var ball2 = {
+        x: 1400,
+        y: 30,
+        radius: 30,
+        color: "green",
+        xuSpeed: -1 * ball2_velocity,
+        yuSpeed: 0,
+        xvSpeed: v2
+      };
+
+      function start() {
+        ball1.x = 60;
+        ball2.x = 1400;
+        ball1.xuSpeed = ball1_velocity;
+        ball1.xvSpeed = v1;
+        ball2.xuSpeed = -1 * ball2_velocity;
+        ball2.xvSpeed = v2;
+        collide = false;
+        tick();
+      }
+
+      function tick() {
+        updateBalls();
+        draw();
+        window.setTimeout("tick()", 1000 / 60);
+      }
+
+      function updateBalls() {
+        if (Math.abs(ball1.x - ball2.x) <= 60 || collide) {
+          ball1.x += ball1.xvSpeed;
+          ball2.x += ball2.xvSpeed;
+          if (!collide) collide = true;
+        }
+        if (!collide) {
+          ball1.x += ball1.xuSpeed;
+          ball2.x += ball2.xuSpeed;
+        }
+      }
+
+      function draw() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 1500, 480);
+        drawBall(ball1);
+        drawBall(ball2);
+      }
+
+      function drawBall(ball) {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = ball.color;
+        ctx.fill();
+      }
+
+      function error_show(e) {
+        var x = document.getElementById("snackbar_");
+        x.innerHTML = e;
+        x.className = "show";
+        setTimeout(function () {
+          x.className = x.className.replace("show", "");
+        }, 3000);
+      }
+
+      drawBall(ball1);
+      drawBall(ball2);
+    </script>
+  </body>
+</html>

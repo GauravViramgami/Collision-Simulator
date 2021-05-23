@@ -1,0 +1,52 @@
+body,
+h1 {
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 500;
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 800;
+}
+
+.form-fill {
+  padding: 8%;
+  padding-top: 2%;
+}
+
+.heading-top {
+  text-align: center;
+  padding: 4%;
+  padding-bottom: 2%;
+}
+
+.assumptions {
+  text-align: left;
+}
+
+/* Snackbar */
+
+#snackbar_ {
+  visibility: hidden;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  text-align: center;
+  border-radius: 2px;
+  padding: 16px;
+  position: fixed;
+  border-radius: 10px;
+  z-index: 9;
+  margin-left: 50%;
+  bottom: 30px;
+  transform: translate(-50%, 0);
+  font-size: 17px;
+}
+
+#snackbar_.show {
+  visibility: visible;
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
